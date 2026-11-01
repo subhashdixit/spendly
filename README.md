@@ -1,175 +1,108 @@
 # Spendly
-### An expense-tracking prototype built to learn spec-driven development with Claude
 
-Spendly is a personal expense-tracking web application built with **Python, Flask, SQLite, and Jinja2**. I used this project to practice turning written requirements into implementation plans, building features with Claude, and reviewing the result against the specification.
+[Open the application](https://subhashdixit.github.io/spendly/) · [Report an issue](https://github.com/subhashdixit/spendly/issues)
 
-**Status:** Learning prototype in progress. Authentication and a database-backed dashboard are implemented; adding, editing, and deleting expenses through the UI are planned.
+A spec-driven expense-tracking learning project, extended into a usable HTML/JavaScript local expense workspace. The original Flask registration/login/profile prototype is preserved, while the Pages application completes expense CRUD without requiring a server account.
 
-[Explore the specifications](.claude/specs/) · [Implementation plans](.claude/plans/) · [Development workflow](instructions.md)
+## What the finished application does
 
-## Project preview
+- Add, edit and delete expenses; filter by dates/categories and inspect totals.
+- Save an exact integer-paise workspace in localStorage.
+- Export/import validated JSON backups and explicitly clear local data.
+- Try fictional records without exposing the original account database.
 
-![Spendly project screenshot](Screenshot%202026-03-25%20at%2012.36.20%E2%80%AFAM.png)
+## Use the application step by step
 
-*Repository screenshot captured during development; the current interface may differ.*
+1. Open the live application. Read the input labels and scope panel.
+2. Start with the included example to understand the output.
+3. Replace it with your own supported input. Files are processed locally unless you explicitly choose a server feature and consent to it.
+4. Run the analysis and inspect the visual output together with its limitations.
+5. Export your results when the tool offers a download. Keep your own copy; a browser tab is not a durable data store.
 
-## Why I built this
+## Concepts, algorithms and interpretation
 
-The main objective was to learn **spec-driven development using Claude**, with Spendly providing a practical application to build incrementally.
+### Why a local workspace?
 
-The workflow documented in this repository is:
+GitHub Pages serves static files and cannot run Flask or securely store server sessions. The maintained release uses a single-browser expense book, clearly labelled as local. This makes expense tracking usable on free static hosting without pretending that browser-local names/passwords create secure server accounts. The older Flask prototype remains in source for studying account architecture, but is not deployed by this workflow.
 
-1. Define the feature scope, requirements, and acceptance criteria.
-2. Review and save the specification.
-3. Ask Claude to produce an implementation plan from the specification and existing code.
-4. Review the plan and implement the feature on a branch.
-5. Review the changes and validate them against the specification.
-6. Iterate, commit, and open a pull request.
+### Correct money and transactional state
 
-The specifications and plans are part of the project deliverable: they show how requirements were broken into manageable implementation steps. Claude assisted development; this app does not contain an AI assistant or require a Claude API key to run.
+Parse amount text into integer paise: INR 12.30 becomes 1230. Thus 0.10 + 0.20 becomes exactly 30 paise. Floating-point rupee sums can accumulate errors. Every record validates ID, date, category and bounds. An immutable ExpenseBook returns new state on update/delete. The UI persists that validated state before replacing its in-memory book; failed persistence is reported. A JSON import validates the entire set and duplicate IDs before asking to replace existing records. Totals are computed from the same filtered rows shown in the table.
 
-## Current capabilities
+### Spec-driven development
 
-| Capability | Current status |
-|---|---|
-| Landing, registration, and login pages | Implemented |
-| Registration with server-side validation and password hashing | Implemented |
-| Session-based login and logout | Implemented |
-| Protected profile dashboard | Implemented |
-| Total spending, transaction count, and top spending category | Implemented |
-| Ten most recent transactions and category breakdown | Implemented |
-| SQLite schema initialization and sample data | Implemented |
-| Add, edit, and delete expenses through the UI | Planned; routes currently return placeholder messages |
+The release scope and acceptance criteria are in `.claude/specs/06-pages-expense-workspace.md`; its implementation plan is in `.claude/plans/06-pages-expense-workspace.md`. The original specifications/plans remain. Tests verify exact arithmetic, immutable CRUD, filtered totals, leap dates and rejected imports.
 
-These statuses describe the source implementation, not a claim of production readiness or a completed runtime verification.
-
-## Specifications and implementation evidence
-
-| Milestone | Specification | Plan | Implementation |
-|---|---|---|---|
-| Database setup | [Spec](.claude/specs/01-database-setup.md) | [Plan](.claude/plans/01-database-setup.md) | [Database helpers](database/db.py) |
-| Registration | [Spec](.claude/specs/02-registration.md) | [Plan](.claude/plans/02-registration.md) | [Flask routes](app.py) |
-| Login and logout | [Spec](.claude/specs/03-login-and-logout.md) | [Plan](.claude/plans/03-login-and-logout-plan.md) | [Flask routes](app.py) |
-| Profile page | [Spec](.claude/specs/04-profile-page.md) | [Plan](.claude/plans/04-profile-page-plan.md) | [Profile template](templates/profile.html) |
-| Profile database integration | Specification file currently empty | [Plan](.claude/plans/05-backend-connection-plan.md) | [Queries](database/queries.py) · [Tests](tests/test_backend_connection.py) |
-
-The incomplete backend specification is a documentation gap to close. Any specification reconstructed after implementation should be identified as retrospective.
-
-## Architecture
+## Architecture and data flow
 
 ```mermaid
 flowchart LR
-    Browser["Browser: HTML, CSS, JavaScript"] --> Routes["Flask routes: app.py"]
-    Routes --> Templates["Jinja2 templates"]
-    Templates --> Browser
-    Routes --> Auth["Database and authentication helpers"]
-    Routes --> Queries["Dashboard queries"]
-    Auth --> DB[("SQLite: spendly.db")]
-    Queries --> DB
+  Input[Validated example or user input] --> Logic[Browser JavaScript engine]
+  Logic --> Charts[Accessible results and SVG charts]
+  Logic --> Export[Local downloadable results]
+  Git[Versioned main branch] --> CI[Formatting, lint and behavior tests]
+  CI --> Pages[Publish site only to GitHub Pages]
 ```
 
-| Layer | Technology / responsibility |
-|---|---|
-| Backend | Flask routes, form processing, sessions, and redirects |
-| Views | Jinja2 templates with shared layout |
-| Frontend | HTML, custom CSS, and vanilla JavaScript |
-| Persistence | SQLite with parameterized queries and foreign-key enforcement |
-| Passwords | Werkzeug password hashing and verification |
-| Testing | pytest and pytest-flask |
-| Development assistance | Claude, specifications, implementation plans, and project guidance |
+HTML provides the accessible page structure, CSS handles responsive layout, and ES modules separate calculation from user interaction. Pure calculation functions can run in Node tests without a browser. SVG charts scale with the screen; they use explicit axes, labels and legends. CSV exports escape spreadsheet formula prefixes in text cells.
 
-## Run locally
 
-Use **Python 3.10+**. Run commands from the repository root so the relative SQLite path resolves consistently.
+
+## Run locally from scratch
+
+Install Node.js 22 and Python 3 for a local static HTTP server. Python is not a production backend for this app.
 
 ```bash
-git clone https://github.com/subhashdixit/Spendly.git
-cd Spendly
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-python app.py
+git clone https://github.com/subhashdixit/spendly.git
+cd spendly
+npm ci
+npm test
+npm run lint
+npm run format
+npm run check
+python3 -m http.server 8000 --directory site
 ```
 
-On Windows, create the environment with `python -m venv .venv` and activate it in PowerShell with `.\.venv\Scripts\Activate.ps1`.
+Open http://localhost:8000. Use HTTP rather than double-clicking HTML so that module imports and local data fetches work consistently. No production API secret belongs in `site/`.
 
-Open **http://localhost:5001**.
-
-The application initializes its database on startup. If the users table is empty, it seeds a development account and eight sample expenses. The repository also contains a database snapshot, so an existing checkout may already contain records.
-
-### Explore the dashboard
-
-Register a new account to see the empty dashboard. For a fresh database seeded by the application, the development login is:
-
-- Email: `demo@spendly.com`
-- Password: `demo123`
-
-These are public development credentials, intended only for local sample data. The seed function does not recreate that account when other users already exist.
-
-To generate additional sample data locally:
-
-```bash
-python seed_random_user.py
-python seed_expenses.py <user_id> 50 6
-```
-
-The first command prints the generated user ID and email; that user's development password is `password123`. Replace `<user_id>` in the second command with the printed ID to add 50 expenses over approximately six months. Use positive counts and nonnegative month values. These scripts write to the local database.
-
-## Tests and validation
-
-Run the self-contained test directory with:
-
-```bash
-python -m pytest tests/ -v
-```
-
-The existing suite covers dashboard queries, empty states, category-percentage calculations, and authenticated/unauthenticated profile access. Passing results and coverage percentages are not claimed here.
-
-The separate root-level `test_profile.py` is a live-server smoke script. It requires a running app and the `requests` package, which is not in `requirements.txt`; it also creates a test user. Use a disposable local database if running it. A bare `pytest` command also discovers this script, so use `pytest tests/` for the self-contained suite.
-
-## Repository guide
+## Coding structure
 
 ```text
-Spendly/
-├── app.py                  # Application entry point and routes
-├── database/
-│   ├── db.py               # Connections, schema, seeding, authentication
-│   └── queries.py          # Dashboard data queries
-├── templates/              # Jinja2 pages and shared layout
-├── static/                 # CSS and JavaScript
-├── tests/                  # Database and profile integration tests
-├── .claude/
-│   ├── specs/              # Feature requirements
-│   ├── plans/              # Implementation plans
-│   ├── commands/           # Reusable development commands
-│   └── CLAUDE.md           # Guidance for Claude
-├── instructions.md         # Spec-to-PR workflow
-├── seed_expenses.py         # Sample expense generator
-├── seed_random_user.py      # Sample user generator
-└── requirements.txt        # Pinned dependencies
+site/
+  index.html       # accessible application interface
+  styles.css       # responsive design
+  app.js           # interface orchestration
+  engine.js        # validated calculations; no DOM dependency
+  ui.js            # chart, CSV and download helpers
+tests/             # behavior and boundary cases
+.github/workflows/pages.yml
+archive/           # original README and retired workflows where present
 ```
 
-## Learning focus
+Original source files, notebooks and historical artifacts remain in the repository for comparison. The release publishes only `site/`; old source directories and datasets are not automatically exposed by the application.
 
-- Writing explicit requirements and acceptance criteria before implementation.
-- Using repository context and constraints to guide Claude.
-- Separating specifications, implementation plans, and application code.
-- Reviewing AI-assisted changes and validating database-backed features.
-- Keeping documentation aligned with implemented behavior.
+## CI/CD and deployment
 
-This repository records an ongoing learning exercise. It does not claim measured productivity gains or production usage.
+CI means continuous integration: each pull request and main-branch push installs exact lockfile dependencies, checks formatting, lints JavaScript, runs meaningful behavior tests and checks module syntax. A failed check stops publishing. CD means continuous deployment: after the required `Build and test` check succeeds on `main`, GitHub Actions uploads `site/` and GitHub Pages serves it over HTTPS.
 
-## Limitations and next steps
+The workflow uses pinned action revisions, minimal permissions and a protected main branch. Publishing jobs need Pages/OIDC permissions; test jobs only read source. Feature branches are deleted after merge. Static Pages hosting needs no always-running Python process, but cannot hide secrets, host a Flask process or provide durable server storage.
 
-- Implement expense creation, editing, and deletion with ownership checks and validation.
-- Complete the backend integration specification and keep feature status current.
-- Expand authentication and expense-management tests, and add automated CI checks.
-- Before public deployment, replace the hardcoded development session key, disable debug mode, review form protection and session settings, and use a controlled demo database.
-- Review the tracked database snapshot and adopt a reproducible synthetic-data-only demo.
-- Add an updated dashboard screenshot, a short walkthrough, and a hosted demo when ready.
+To set up a fork, enable GitHub Pages with **GitHub Actions** as its source and allow the repository's workflow to run. Repository Settings → Pages shows the deployment URL. If renaming the repository, update the README URL and any absolute links; application resources use relative paths. Check Actions logs if publishing fails.
 
-## Author and license
+### Release, monitoring and rollback
 
-**Subhash Dixit** · [GitHub](https://github.com/subhashdixit) · [LinkedIn](https://www.linkedin.com/in/subhash-dixit-nit-durgapur/)
+A commit identifies exactly which source was deployed. Inspect the Actions deployment and test results before sharing the link. After publishing, open the page, run its example and check exports; a successful HTTP response alone is not a functional test. For rollback, revert the faulty merge in a new PR, pass checks, and merge the revert. This triggers the same reproducible publishing process. Avoid force-pushing protected main or deleting history. Browser caches can retain an older asset briefly; refresh after a deployment.
 
-Licensed under [Apache License 2.0](LICENSE).
+### Docker and alternatives
+
+Docker packages code and dependencies into a reproducible runtime. This static app does not require a container: Pages serves the same versioned files directly, with less operating work and no container cold starts. A container becomes useful if adding a Python backend; then secrets, patches, resource costs and persistent storage require separate management.
+
+## Data provenance and attribution
+
+Original Spendly Flask source, specs and history preserved. The tracked original spendly.db stays outside site and is never copied into tests or release assets. All demo expenses are fictional.
+
+## Practical limits
+
+Browser localStorage is unencrypted, profile-specific and can be cleared by the browser. No cross-device sync, server login, durable cloud account or financial reporting guarantee. This app supports INR only. Keep exports and avoid shared browser profiles for private expenses. Up to 10,000 records and 1 MiB backup imports.
+
+The test suite checks calculation contracts and invalid inputs. It cannot establish that an input dataset is representative, that a heuristic is scientifically correct for every domain, or that a result is suitable for an automated consequential decision. Read the original source alongside the maintained browser implementation when comparing behavior.

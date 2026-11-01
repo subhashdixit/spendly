@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="A clear, single-device expense workspace. Add expenses, inspect spending and keep a portable backup."
+    />
+    <title>Spendly</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header>
+      <div class="badge">Subhash Dixit · Applied portfolio</div>
+      <h1>Spendly</h1>
+      <p>
+        A clear, single-device expense workspace. Add expenses, inspect spending
+        and keep a portable backup.
+      </p>
+      <a href="https://github.com/subhashdixit/spendly"
+        >Source, concepts and operating guide ↗</a
+      >
+    </header>
+    <main>
+      <section>
+        <p>
+          <strong>Local workspace:</strong> expenses are saved in this browser
+          only, without an account. This is separate from the preserved Flask
+          login prototype. Export backups before clearing browser data; there is
+          no server sync.
+        </p>
+        <button id="demo">Replace with fictional example</button
+        ><button id="backup">Export JSON backup</button
+        ><label
+          >Import a Spendly JSON backup (1 MiB)<input
+            id="import"
+            type="file"
+            accept=".json,application/json" /></label
+        ><button id="clear">Clear all local expenses</button>
+      </section>
+      <section>
+        <h2>1 · Add or edit an expense</h2>
+        <form id="expense-form" class="grid">
+          <label
+            >Description<input
+              id="description"
+              maxlength="120"
+              required /></label
+          ><label
+            >Amount in INR (0.01–10,000,000)<input
+              id="amount"
+              inputmode="decimal"
+              placeholder="250.00"
+              required /></label
+          ><label>Date<input id="date" type="date" required /></label
+          ><label
+            >Category<select id="category">
+              <option>Food</option>
+              <option>Transport</option>
+              <option>Housing</option>
+              <option>Utilities</option>
+              <option>Health</option>
+              <option>Learning</option>
+              <option>Shopping</option>
+              <option>Other</option>
+            </select></label
+          >
+          <div>
+            <button type="submit" id="save">Save expense</button
+            ><button type="button" id="cancel">Cancel edit</button>
+          </div>
+        </form>
+      </section>
+      <section>
+        <h2>2 · Explore spending</h2>
+        <div class="grid">
+          <label>From<input id="from" type="date" /></label
+          ><label>Through<input id="through" type="date" /></label
+          ><label
+            >Category filter<select id="filter-category">
+              <option value="">All categories</option>
+              <option>Food</option>
+              <option>Transport</option>
+              <option>Housing</option>
+              <option>Utilities</option>
+              <option>Health</option>
+              <option>Learning</option>
+              <option>Shopping</option>
+              <option>Other</option>
+            </select></label
+          >
+        </div>
+        <p id="total" class="metric"></p>
+        <div id="category-totals"></div>
+        <div class="scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>INR</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="expenses"></tbody>
+          </table>
+        </div>
+      </section>
+      <p id="status" role="status" aria-live="polite"></p>
+      <details>
+        <summary>How this works · scope and limitations</summary>
+        <p>
+          Money is parsed as decimal text and stored in integer paise, avoiding
+          floating-point rounding in totals. Imports are validated as a complete
+          set before replacing the current workspace. This browser data is
+          unencrypted and visible to anyone using the same browser profile. No
+          original account database is published.
+        </p>
+      </details>
+    </main>
+    <footer>
+      <p>
+        GitHub Pages · HTML / JavaScript · Original project preserved in source.
+      </p>
+    </footer>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
