@@ -103,6 +103,6 @@ Original Spendly Flask source, specs and history preserved. The tracked original
 
 ## Practical limits
 
-Browser localStorage is unencrypted, profile-specific and can be cleared by the browser. No cross-device sync, server login, durable cloud account or financial reporting guarantee. This app supports INR only. Keep exports and avoid shared browser profiles for private expenses. Up to 10,000 records and 1 MiB backup imports.
+Browser localStorage is unencrypted, profile-specific and can be cleared by the browser. No cross-device sync, server login, durable cloud account or financial reporting guarantee. This app supports INR only. Keep exports and avoid shared browser profiles for private expenses. Up to 10,000 records and 16 MiB backup imports.
 
 The test suite checks calculation contracts and invalid inputs. It cannot establish that an input dataset is representative, that a heuristic is scientifically correct for every domain, or that a result is suitable for an automated consequential decision. Read the original source alongside the maintained browser implementation when comparing behavior.

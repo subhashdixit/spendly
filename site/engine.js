@@ -95,8 +95,8 @@ export class ExpenseBook {
     );
   }
   static import(text) {
-    if (typeof text !== "string" || text.length > 1024 * 1024)
-      throw Error("Backup exceeds 1 MiB.");
+    if (typeof text !== "string" || text.length > 16 * 1024 * 1024)
+      throw Error("Backup exceeds 16 MiB.");
     const data = JSON.parse(text);
     if (data.schema !== 1 || data.currency !== "INR")
       throw Error("Unsupported backup format/currency.");

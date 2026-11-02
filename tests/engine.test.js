@@ -50,3 +50,16 @@ test("filtered totals match visible records", () => {
     book.filter({ from: "2025-01-01", through: "2024-01-01" }),
   );
 });
+
+test("a substantial valid expense book can export and reimport its complete backup", () => {
+  const book = new ExpenseBook(
+    Array.from({ length: 7000 }, (_, i) => ({
+      ...row,
+      id: "record-" + i,
+      description: "Fictional expense " + "x".repeat(90),
+    })),
+  );
+  const text = book.export();
+  assert.ok(text.length > 1024 * 1024);
+  assert.equal(ExpenseBook.import(text).rows.length, 7000);
+});

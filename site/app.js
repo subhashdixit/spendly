@@ -117,8 +117,8 @@ $("backup").addEventListener("click", () =>
 $("import").addEventListener("change", async (event) => {
   try {
     const file = event.target.files[0];
-    if (!file || file.size > 1024 * 1024)
-      throw Error("Use a JSON backup up to 1 MiB.");
+    if (!file || file.size > 16 * 1024 * 1024)
+      throw Error("Use a JSON backup up to 16 MiB.");
     const next = ExpenseBook.import(await file.text());
     if (
       window.confirm(
