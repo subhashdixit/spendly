@@ -1,5 +1,8 @@
 # Spendly
 
+**Reproducible versions:** [Dependency versions and exact setup](DEPENDENCIES.md).
+
+
 [Open the application](https://subhashdixit.github.io/spendly/) · [Report an issue](https://github.com/subhashdixit/spendly/issues)
 
 A spec-driven expense-tracking learning project, extended into a usable HTML/JavaScript local expense workspace. The original Flask registration/login/profile prototype is preserved, while the Pages application completes expense CRUD without requiring a server account.
