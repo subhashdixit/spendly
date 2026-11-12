@@ -1,20 +1,41 @@
 # Spendly
 
-**Reproducible versions:** [Dependency versions and exact setup](DEPENDENCIES.md).
+## 1. Project overview
 
+Local expense CRUD, exact paise totals and portable backups; original Flask learning prototype preserved.
 
-[Open the application](https://subhashdixit.github.io/spendly/) · [Report an issue](https://github.com/subhashdixit/spendly/issues)
+[Live demo](https://subhashdixit.github.io/spendly/) · [Source repository](https://github.com/subhashdixit/spendly)
 
-A spec-driven expense-tracking learning project, extended into a usable HTML/JavaScript local expense workspace. The original Flask registration/login/profile prototype is preserved, while the Pages application completes expense CRUD without requiring a server account.
+![Spendly application screen](docs/images/application.png)
 
-## What the finished application does
+## 2. Motivation and problem statement
+
+### Objective
+
+Track and summarize expenses locally with reliable arithmetic and a portable backup.
+
+### Problem statement
+
+Expense entries change over time, and floating-point arithmetic can introduce rounding errors in totals.
+
+### Motivation
+
+Exact minor-unit totals and a reversible backup make a personal workspace easier to verify.
+
+## 3. Solution and scope
+
+**Inputs** — Expense entries or validated backup JSON. **Outputs** — Filtered totals and downloadable backup.
+
+### What the finished application does
 
 - Add, edit and delete expenses; filter by dates/categories and inspect totals.
 - Save an exact integer-paise workspace in localStorage.
 - Export/import validated JSON backups and explicitly clear local data.
 - Try fictional records without exposing the original account database.
 
-## Use the application step by step
+## 4. Quick start and usage
+
+### Use the application step by step
 
 1. Open the live application. Read the input labels and scope panel.
 2. Start with the included example to understand the output.
@@ -22,21 +43,9 @@ A spec-driven expense-tracking learning project, extended into a usable HTML/Jav
 4. Run the analysis and inspect the visual output together with its limitations.
 5. Export your results when the tool offers a download. Keep your own copy; a browser tab is not a durable data store.
 
-## Concepts, algorithms and interpretation
+## 5. High-level architecture
 
-### Why a local workspace?
-
-GitHub Pages serves static files and cannot run Flask or securely store server sessions. The maintained release uses a single-browser expense book, clearly labelled as local. This makes expense tracking usable on free static hosting without pretending that browser-local names/passwords create secure server accounts. The older Flask prototype remains in source for studying account architecture, but is not deployed by this workflow.
-
-### Correct money and transactional state
-
-Parse amount text into integer paise: INR 12.30 becomes 1230. Thus 0.10 + 0.20 becomes exactly 30 paise. Floating-point rupee sums can accumulate errors. Every record validates ID, date, category and bounds. An immutable ExpenseBook returns new state on update/delete. The UI persists that validated state before replacing its in-memory book; failed persistence is reported. A JSON import validates the entire set and duplicate IDs before asking to replace existing records. Totals are computed from the same filtered rows shown in the table.
-
-### Spec-driven development
-
-The release scope and acceptance criteria are in `.claude/specs/06-pages-expense-workspace.md`; its implementation plan is in `.claude/plans/06-pages-expense-workspace.md`. The original specifications/plans remain. Tests verify exact arithmetic, immutable CRUD, filtered totals, leap dates and rejected imports.
-
-## Architecture and data flow
+### Architecture and data flow
 
 ```mermaid
 flowchart LR
@@ -49,9 +58,81 @@ flowchart LR
 
 HTML provides the accessible page structure, CSS handles responsive layout, and ES modules separate calculation from user interaction. Pure calculation functions can run in Node tests without a browser. SVG charts scale with the screen; they use explicit axes, labels and legends. CSV exports escape spreadsheet formula prefixes in text cells.
 
+## 6. End-to-end request workflow
 
+```mermaid
+sequenceDiagram
+    actor User
+    participant UI as Project interface
+    participant Engine as Browser engine
+    User->>UI: Provide Expense entries or validated backup JSON
+    UI->>Engine: Process validated input
+    Engine->>Engine: Validate, store integer paise and aggregate locally
+    Engine-->>UI: Filtered totals and downloadable backup
+    UI-->>User: Present result or input feedback
+```
 
-## Run locally from scratch
+## 7. Data sources, inputs, and outputs
+
+| Input | Processing | Output |
+| --- | --- | --- |
+| Expense entries or validated backup JSON | Validate, store integer paise and aggregate locally | Filtered totals and downloadable backup |
+
+### Data provenance and attribution
+
+Original Spendly Flask source, specs and history preserved. The tracked original spendly.db stays outside site and is never copied into tests or release assets. All demo expenses are fictional.
+
+## 8. Data flow and ETL pipeline
+
+```mermaid
+flowchart LR
+    A["Expense entries or validated backup JSON"] --> B["Validate, store integer paise and aggregate locally"] --> C["Filtered totals and downloadable backup"]
+```
+
+## 9. Low-level design and interfaces
+
+Implementation entry points are [`site/index.html`](<site/index.html>), [`site/app.js`](<site/app.js>), [`site/engine.js`](<site/engine.js>).
+
+## 10. Concepts and algorithms
+
+### Concepts, algorithms and interpretation
+
+#### Why a local workspace?
+
+GitHub Pages serves static files and cannot run Flask or securely store server sessions. The maintained release uses a single-browser expense book, clearly labelled as local. This makes expense tracking usable on free static hosting without pretending that browser-local names/passwords create secure server accounts. The older Flask prototype remains in source for studying account architecture, but is not deployed by this workflow.
+
+#### Correct money and transactional state
+
+Parse amount text into integer paise: INR 12.30 becomes 1230. Thus 0.10 + 0.20 becomes exactly 30 paise. Floating-point rupee sums can accumulate errors. Every record validates ID, date, category and bounds. An immutable ExpenseBook returns new state on update/delete. The UI persists that validated state before replacing its in-memory book; failed persistence is reported. A JSON import validates the entire set and duplicate IDs before asking to replace existing records. Totals are computed from the same filtered rows shown in the table.
+
+#### Spec-driven development
+
+The release scope and acceptance criteria are in `.claude/specs/06-pages-expense-workspace.md`; its implementation plan is in `.claude/plans/06-pages-expense-workspace.md`. The original specifications/plans remain. Tests verify exact arithmetic, immutable CRUD, filtered totals, leap dates and rejected imports.
+
+## 11. Technology choices and dependencies
+
+- **HTML, CSS, and JavaScript**. Serve a static browser interface with inspectable rendering and validation.
+- **localStorage**. Persist the local expense workspace without requiring a server account.
+
+[Dependency versions and runtime rationale](DEPENDENCIES.md)
+
+## 12. Training, inference, and evaluation
+
+Review behavior using the checked-in fixtures and assertions. This application has no project-trained model benchmark.
+
+Validation code is available in [`tests/engine.test.js`](<tests/engine.test.js>), [`tests/test_backend_connection.py`](<tests/test_backend_connection.py>).
+
+## 13. Limitations and data handling
+
+### Practical limits
+
+Browser localStorage is unencrypted, profile-specific and can be cleared by the browser. No cross-device sync, server login, durable cloud account or financial reporting guarantee. This app supports INR only. Keep exports and avoid shared browser profiles for private expenses. Up to 10,000 records and 16 MiB backup imports.
+
+The test suite checks calculation contracts and invalid inputs. It cannot establish that an input dataset is representative, that a heuristic is scientifically correct for every domain, or that a result is suitable for an automated consequential decision. Read the original source alongside the maintained browser implementation when comparing behavior.
+
+## 14. Installation and local setup
+
+### Run locally from scratch
 
 Install Node.js 22 and Python 3 for a local static HTTP server. Python is not a production backend for this app.
 
@@ -68,7 +149,13 @@ python3 -m http.server 8000 --directory site
 
 Open http://localhost:8000. Use HTTP rather than double-clicking HTML so that module imports and local data fetches work consistently. No production API secret belongs in `site/`.
 
-## Coding structure
+### Local dependency installation
+
+The maintained app is HTML/CSS/JavaScript and needs no Python packages. `requirements.txt` documents this; install development tools with `npm ci` using the pinned Node/npm versions. See [DEPENDENCIES.md](DEPENDENCIES.md). Original prototype requirements are preserved at `archive/prototype-requirements.in` where present; they are not the supported install command.
+
+## 15. Repository structure
+
+### Coding structure
 
 ```text
 site/
@@ -84,7 +171,9 @@ archive/           # original README and retired workflows where present
 
 Original source files, notebooks and historical artifacts remain in the repository for comparison. The release publishes only `site/`; old source directories and datasets are not automatically exposed by the application.
 
-## CI/CD and deployment
+## 16. Deployment and operations
+
+### CI/CD and deployment
 
 CI means continuous integration: each pull request and main-branch push installs exact lockfile dependencies, checks formatting, lints JavaScript, runs meaningful behavior tests and checks module syntax. A failed check stops publishing. CD means continuous deployment: after the required `Build and test` check succeeds on `main`, GitHub Actions uploads `site/` and GitHub Pages serves it over HTTPS.
 
@@ -92,24 +181,14 @@ The workflow uses pinned action revisions, minimal permissions and a protected m
 
 To set up a fork, enable GitHub Pages with **GitHub Actions** as its source and allow the repository's workflow to run. Repository Settings → Pages shows the deployment URL. If renaming the repository, update the README URL and any absolute links; application resources use relative paths. Check Actions logs if publishing fails.
 
-### Release, monitoring and rollback
+#### Release, monitoring and rollback
 
 A commit identifies exactly which source was deployed. Inspect the Actions deployment and test results before sharing the link. After publishing, open the page, run its example and check exports; a successful HTTP response alone is not a functional test. For rollback, revert the faulty merge in a new PR, pass checks, and merge the revert. This triggers the same reproducible publishing process. Avoid force-pushing protected main or deleting history. Browser caches can retain an older asset briefly; refresh after a deployment.
 
-### Docker and alternatives
+#### Docker and alternatives
 
 Docker packages code and dependencies into a reproducible runtime. This static app does not require a container: Pages serves the same versioned files directly, with less operating work and no container cold starts. A container becomes useful if adding a Python backend; then secrets, patches, resource costs and persistent storage require separate management.
 
-## Data provenance and attribution
+## 17. License, credits, and support
 
-Original Spendly Flask source, specs and history preserved. The tracked original spendly.db stays outside site and is never copied into tests or release assets. All demo expenses are fictional.
-
-## Practical limits
-
-Browser localStorage is unencrypted, profile-specific and can be cleared by the browser. No cross-device sync, server login, durable cloud account or financial reporting guarantee. This app supports INR only. Keep exports and avoid shared browser profiles for private expenses. Up to 10,000 records and 16 MiB backup imports.
-
-The test suite checks calculation contracts and invalid inputs. It cannot establish that an input dataset is representative, that a heuristic is scientifically correct for every domain, or that a result is suitable for an automated consequential decision. Read the original source alongside the maintained browser implementation when comparing behavior.
-
-## Local dependency installation
-
-The maintained app is HTML/CSS/JavaScript and needs no Python packages. `requirements.txt` documents this; install development tools with `npm ci` using the pinned Node/npm versions. See [DEPENDENCIES.md](DEPENDENCIES.md). Original prototype requirements are preserved at `archive/prototype-requirements.in` where present; they are not the supported install command.
+[Repository code license](LICENSE). Report reproducible issues through [GitHub Issues](https://github.com/subhashdixit/spendly/issues).
